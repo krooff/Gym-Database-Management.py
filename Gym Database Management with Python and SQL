@@ -1,0 +1,127 @@
+#Task 1
+import mysql.connector
+
+def add_member(id, name, age):
+    try:
+        connection = mysql.connector.connect(
+            host="your_host",
+            user="your_username",
+            password="your_password",
+            database="gym_db"
+        )
+        cursor = connection.cursor()
+
+        # SQL query to add a new member
+        query = "INSERT INTO Members (id, name, age) VALUES (%s, %s, %s)"
+        cursor.execute(query, (id, name, age))
+        
+        # Commit the transaction
+        connection.commit()
+        print(f"Member {name} added successfully.")
+
+    except mysql.connector.Error as err:
+        if err.errno == 1062:  # Duplicate entry error
+            print("Error: Member with this ID already exists.")
+        else:
+            print(f"Error: {err}")
+    finally:
+        cursor.close()
+        connection.close()
+
+#Task 2:
+
+def add_workout_session(member_id, date, duration_minutes, calories_burned):
+    try:
+        connection = mysql.connector.connect(
+            host="your_host",
+            user="your_username",
+            password="your_password",
+            database="gym_db"
+        )
+        cursor = connection.cursor()
+
+        # SQL query to add a new workout session
+        query = """
+        INSERT INTO WorkoutSessions (member_id, session_date, duration_minutes, calories_burned)
+        VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(query, (member_id, date, duration_minutes, calories_burned))
+
+        # Commit the transaction
+        connection.commit()
+        print(f"Workout session added successfully for member {member_id}.")
+
+    except mysql.connector.Error as err:
+        if err.errno == 1452:  # Foreign key constraint error (invalid member ID)
+            print("Error: Invalid member ID.")
+        else:
+            print(f"Error: {err}")
+    finally:
+        cursor.close()
+        connection.close()
+
+#Task 3:
+
+def update_member_age(member_id, new_age):
+    try:
+        connection = mysql.connector.connect(
+            host="your_host",
+            user="your_username",
+            password="your_password",
+            database="gym_db"
+        )
+        cursor = connection.cursor()
+
+        # Check if the member exists
+        cursor.execute("SELECT * FROM Members WHERE id = %s", (member_id,))
+        member = cursor.fetchone()
+
+        if member:
+            # SQL query to update member's age
+            query = "UPDATE Members SET age = %s WHERE id = %s"
+            cursor.execute(query, (new_age, member_id))
+
+            # Commit the transaction
+            connection.commit()
+            print(f"Member {member_id} age updated successfully to {new_age}.")
+        else:
+            print("Error: Member not found.")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
+        connection.close()
+
+#Task 4:
+
+def delete_workout_session(session_id):
+    try:
+        connection = mysql.connector.connect(
+            host="your_host",
+            user="your_username",
+            password="your_password",
+            database="gym_db"
+        )
+        cursor = connection.cursor()
+
+        # Check if the session exists
+        cursor.execute("SELECT * FROM WorkoutSessions WHERE session_id = %s", (session_id,))
+        session = cursor.fetchone()
+
+        if session:
+            # SQL query to delete the session
+            query = "DELETE FROM WorkoutSessions WHERE session_id = %s"
+            cursor.execute(query, (session_id,))
+
+            # Commit the transaction
+            connection.commit()
+            print(f"Workout session {session_id} deleted successfully.")
+        else:
+            print("Error: Session not found.")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
+        connection.close()
